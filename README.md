@@ -159,7 +159,7 @@ bootstrap();
 ```shell
 number
 ```
-<br/>
+
 ### mapped-types
 mapped-types는 DTO를 transform해주는 유용한 라이브러리이다.
 여기서 **`DTO`** 란 `Data Transfer Object`의 약자로 Typescript에서는 데이터가 네트워크를 통해 전송함에 있어 타이핑을 체크하기 위한 스키마를 정의하는 개체이다.
