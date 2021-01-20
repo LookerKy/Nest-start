@@ -92,7 +92,7 @@ $ nest new [projectName]
 
 ### Module  
 
-Module은 `@Module()` 데코레이터로 표기하며, Nest가 애플리케이션 구조를 구성하는데 사용하는 메타 데이터를 제공합니다. 모든 nest application은 `하나 이상의 Module`을 갖습니다. 모듈의 종류는 다음과 같습니다.
+Module은 **`@Module()`** 데코레이터로 표기하며, Nest가 애플리케이션 구조를 구성하는데 사용하는 메타 데이터를 제공합니다. 모든 nest application은 `하나 이상의 Module`을 갖습니다. 모듈의 종류는 다음과 같습니다.
 
 - Root Module  
 
@@ -104,4 +104,102 @@ Module은 `@Module()` 데코레이터로 표기하며, Nest가 애플리케이�
 
 - Dynamic Module
 
+Module은 기능별로 분리하는 것이 좋고, Root module은 전체 Module을 응집하는 최상위 Module이라고 할 수 있다.
 
+### Pipe
+
+Pipe는 쉽게 설명하면 express의 middleware와 비슷한 동작을 한다. 기본적인 파이프의 종류는 다음과 같다.
+
+- ValidationPipe  
+
+- ParseIntPipe
+
+- ParseBoolPipe
+
+- ParseArrayPipe
+
+- ParseUUIDPipe
+
+- DefaultValuePipe
+
+이 중 Validatepip는 request에 관련된 유효성을 검사해주는 파이프이다 .
+
+```javascript 
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  await app.listen(3000);
+}
+bootstrap();
+```
+- whitelist : decorator(@)가 없는 속성이 들어오면 해당 속성은 제거하고 받아들입니다.(ex DTO @IsString)
+
+- forbidNonWhitelisted : DTO에 명시해 둔 외의 인자가 요청 시 차단하는 역할을 해준다.
+
+- transform : api의 url을 통해 들어오는 모든 인자들은 기본적으로 모두 string type이다. 해당 option을 사용 시 parameter에 명시해 둔 Type으로 변경해준다.  
+
+
+##### [transform EX]
+
+```javascript
+@Get('/:id')
+  getOne(@Param('id') movieId: number) {
+    console.log(typeof movieId);
+    return this.moviesService.getOne(movieId);
+  }
+```
+
+##### [result]
+```shell
+number
+```
+<br/>
+### mapped-types
+mapped-types는 DTO를 transform해주는 유용한 라이브러리이다.
+여기서 **`DTO`** 란 `Data Transfer Object`의 약자로 Typescript에서는 데이터가 네트워크를 통해 전송함에 있어 타이핑을 체크하기 위한 스키마를 정의하는 개체이다.
+예를 들면 CRUD 중 Create와 Update시 두 DTO가 아래와 같이 거의 동일한 경우가 있다.
+```javascript
+export class CreateMovieDTO {
+  @IsString()
+  readonly title: string;
+
+  @IsNumber()
+  readonly year: number;
+
+  @IsString({ each: true })
+  readonly genres: string[];
+}
+
+export class UpdateMovieDto {
+  @IsString()
+  readonly title?: string;
+
+  @IsNumber()
+  readonly year?: number;
+
+  @IsString({ each: true })
+  readonly genre?: string[];
+}
+```
+이와 같은경우 유사한 코드가 반복되는 현상이 발생한다. 이와 같은경우 mapped-types를 사용하면 더욱 간결한 코드를 짤 수 있다.
+
+**[mapped-types install]**  
+
+```shell
+npm i @nestjs/mapped-types
+```
+**[mapped-types 적용 후]**
+
+```javascript
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateMovieDto } from './create-movie.dto';
+
+export class UpdateMovieDto extends PartialType(CreateMovieDto) {}
+```
+mapped-types의 **`partialType`** 은 상속 DTO의 개체들을 선택적으로 만드는 기능을 한다.
