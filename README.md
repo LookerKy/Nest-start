@@ -76,7 +76,11 @@ Nest is [MIT licensed](LICENSE).
 
 ## Nestjs
 
-Nestjs는 반드시 하나만 존재해야하는 **`Main`** 을 가지고 있고, `Module`,`Controller`,`Service`로 기본 구성이 되어있습니다.  
+Nest js는 기본적으로 express위에서 돌아가는 frame work이며, enterprise에 특화되며 typescript를 이용한 framework입니다.
+
+Nest js에서 festify를 사용하기 위해선 정해진 방식 이용해 접근하는게 중요합니다. 그렇지 않으면 성능저하나 충돌이 일어날 가능성이 높습니다.(추후 따로 빼서 정리)
+
+Nestjs는 반드시 하나만 존재해야하는 **`Main`** 을 가지고 있고, `Module`, `Controller`, `Service`로 기본 구성이 되어있습니다.  
 
 ### install & Create Project
 
@@ -122,7 +126,7 @@ Pipe는 쉽게 설명하면 express의 middleware와 비슷한 동작을 한다.
 
 - DefaultValuePipe
 
-이 중 Validatepip는 request에 관련된 유효성을 검사해주는 파이프이다 .
+이 중 ValidatePipe는 request에 관련된 유효성을 검사해주는 파이프이다 .
 
 ```javascript 
 async function bootstrap() {
@@ -202,4 +206,47 @@ import { CreateMovieDto } from './create-movie.dto';
 
 export class UpdateMovieDto extends PartialType(CreateMovieDto) {}
 ```
-mapped-types의 **`partialType`** 은 상속 DTO의 개체들을 선택적으로 만드는 기능을 한다.
+mapped-types의 **`partialType`** 은 상속 DTO의 개체들을 선택적(Optional)으로 만드는 기능을 한다.
+
+### Unit Test
+ - Unit Test: 소프트웨어를 이루고 있는 가장 작은 모듈에 대한 테스트
+
+ - 클래스, 함수, 단위로 테스트
+
+ - 각 테스트는 독립적인 목표와 상태를 갖고있어야 하며 각각의 테스트의 결과는 다른 테스트에 영향을 미치지 말아야 함
+
+ - jest : javascript, node, typescript등의 테스트 도구 
+
+```javascript
+import { Test, TestingModule } from '@nestjs/testing';
+import { MoviesService } from './movies.service';
+
+describe('MoviesService', () => {
+  let service: MoviesService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [MoviesService],
+    }).compile();
+
+    service = module.get<MoviesService>(MoviesService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should be 4', () => {
+    expect(2 + 2).toEqual(4);
+  });
+});
+```
+- describe : 테스트 정의
+
+- beforEach : 각 테스트 케이스가 실행되기 전 수행될 내용
+
+- it('Test Name', callback) : 단위 테스트 명 정의 및 테스트 구현 콜백
+
+- expect : 테스트 대상 function or class 
+
+### e2e Testing (End 2 End)

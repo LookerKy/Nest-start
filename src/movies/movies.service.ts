@@ -25,7 +25,6 @@ export class MoviesService {
   }
 
   create(movieData: CreateMovieDto) {
-    console.log(movieData);
     this.movies.push({
       id: this.movies.length + 1,
       ...movieData,
