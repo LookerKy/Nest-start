@@ -11,7 +11,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      disableErrorMessages: true, // erro message 생략 Prod모드일 때 사용
+      disableErrorMessages: true, // clientSide erro message 생략 Prod모드일 때 사용
     }),
   );
   await app.listen(3000);

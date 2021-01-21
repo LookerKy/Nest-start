@@ -80,7 +80,7 @@ Nest js는 기본적으로 express위에서 돌아가는 frame work이며, enter
 
 Nest js에서 festify를 사용하기 위해선 정해진 방식 이용해 접근하는게 중요합니다. 그렇지 않으면 성능저하나 충돌이 일어날 가능성이 높습니다.(추후 따로 빼서 정리)
 
-Nestjs는 반드시 하나만 존재해야하는 **`Main`** 을 가지고 있고, `Module`, `Controller`, `Service`로 기본 구성이 되어있습니다.  
+Nestjs는 반드시 하나만 존재해야하는 **`Main`** 을 가지고 있고, `Module`, `Controller`, `Provider`로 기본 구성이 되어있습니다.  
 
 ### install & Create Project
 
@@ -109,6 +109,12 @@ Module은 **`@Module()`** 데코레이터로 표기하며, Nest가 애플리케�
 - Dynamic Module
 
 Module은 기능별로 분리하는 것이 좋고, Root module은 전체 Module을 응집하는 최상위 Module이라고 할 수 있다.
+
+### Controller
+> todo
+
+### Provider
+> todo
 
 ### Pipe
 
@@ -250,3 +256,88 @@ describe('MoviesService', () => {
 - expect : 테스트 대상 function or class 
 
 ### e2e Testing (End 2 End)
+e2e테스트는 unit test와 반대로 실행중인 환경에 의존하는 테스트이다.
+
+```javascript
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
+
+describe('AppController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        disableErrorMessages: true, // clientSide erro message 생략 Prod모드일 때 사용
+      }),
+    );
+    await app.init();
+  });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('welcome to my Movie Api');
+  });
+
+  describe('/movies', () => {
+    it('GET', () => {
+      return request(app.getHttpServer()).get('/movies').expect(200).expect([]);
+    });
+    it('POST 201', () => {
+      return request(app.getHttpServer())
+        .post('/movies')
+        .send({
+          title: 'Test create Movie',
+          genre: ['action', 'stealer'],
+          year: 2020,
+        })
+        .expect(201);
+    });
+    it('POST 400', () => {
+      return request(app.getHttpServer())
+        .post('/movies')
+        .send({
+          title: 'Test create Movie',
+          genre: ['action', 'stealer'],
+          year: 2020,
+          other: 'things',
+        })
+        .expect(400);
+    });
+    it('DELETE', () => {
+      return request(app.getHttpServer()).delete('/movies').expect(404);
+    });
+  });
+  describe('/movies/:id', () => {
+    // it.todo('GET 200');
+    it('GET 200', () => {
+      return request(app.getHttpServer()).get('/movies/1').expect(200);
+    });
+    it('GET 404', () => {
+      return request(app.getHttpServer()).get('/movies/222').expect(404);
+    });
+    it('PATCH 200', () => {
+      return request(app.getHttpServer())
+        .patch('/movies/1')
+        .send({ title: 'Test update movie' })
+        .expect(200);
+    });
+    it('DELETE 200', () => {
+      return request(app.getHttpServer()).delete('/movies/1').expect(200);
+    });
+  });
+});
+```
+ - beforeAll : beforeEach와 마찬가지로 테스트 실행 전 수행 될 내용이지만 테스팅이 끝날 때 까지 수행된 내용 유지
