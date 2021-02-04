@@ -96,7 +96,7 @@ $ nest new [projectName]
 
 ### Module  
 
-Module은 **`@Module()`** 데코레이터로 표기하며, Nest가 애플리케이션 구조를 구성하는데 사용하는 메타 데이터를 제공합니다. 모든 nest application은 `하나 이상의 Module`을 갖습니다. 모듈의 종류는 다음과 같습니다.
+Module은 **`@Module()`** 데코레이터로 표기하며, Nest가 애플리케이션 구조를 구성하는데 사용하는 메타 데이터를 제공합니다.  모든 nest application은 `하나 이상의 Module`을 갖습니다. 모듈의 종류는 다음과 같습니다.
 
 - Root Module  
 
@@ -108,10 +108,23 @@ Module은 **`@Module()`** 데코레이터로 표기하며, Nest가 애플리케�
 
 - Dynamic Module
 
-Module은 기능별로 분리하는 것이 좋고, Root module은 전체 Module을 응집하는 최상위 Module이라고 할 수 있다.
+Module은 기능별로 분리하는 것이 좋고, Root module은 전체 Module을 응집하는 최상위 Module이라고 할 수 있습니다.
+
+### HTTP Module
+ HttpModule은 Axios를 탑재한 nestJs common module입니다.
+> HttpModule은 Obervable이지 async/awiat가 아니다.
+>> "The HttpModule uses Observable not Promise which doesn't work with async/await. All HttpService methods return Observable<AxiosResponse<T>>."
+
+그래서 이 동작을 `async/await` 하게 만들려면 Promise로 아래와 같이 변경해줘야한다
+
+```javascript
+  create(data): Promise<AxiosResponse> {
+    return this.httpService.post(url, data).toPromise();
+}
+```
 
 ### Controller
-> todo
+> to be continue
 
 ### Provider
 > todo
